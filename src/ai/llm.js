@@ -225,8 +225,7 @@ async function callOpenCode(prompt) {
       model: config.model,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
-      max_tokens: 600,
-      reasoning_effort: "low"
+      max_tokens: 16000
     });
     
     const promptSize = Buffer.byteLength(postData, 'utf8');
