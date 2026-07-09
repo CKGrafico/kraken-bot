@@ -385,11 +385,12 @@ ${strategyText}
 ${jsonData}
 
 === RESPONSE FORMAT ===
-Your response MUST start with these exact lines (no preamble, no thinking out loud):
-
 SENTIMENT: [bullish/neutral/bearish]
 RISK: [low/medium/high]
-ANALYSIS: [2-3 sentences max. What is happening and your decision.]
+
+ANALYSIS: [Plain language reasoning. What's happening and why. Be decisive.]
+DECISION: [Your action and why]
+
 COMMANDS:
 [One command per line, or HOLD]
 
@@ -405,27 +406,23 @@ Notes:
 }
 
 function parseResponse(response) {
-  // Strip any preamble before the first known label (reasoning models may add one)
-  const firstLabel = response.search(/^(SENTIMENT|RISK|ANALYSIS|COMMANDS):/im);
-  const clean = firstLabel > 0 ? response.slice(firstLabel) : response;
-
-  // Try block format first
+  // Try new block format first
   let commands = null;
-  const blockMatch = clean.match(/---COMMANDS---\s*([\s\S]*?)---END---/i);
+  const blockMatch = response.match(/---COMMANDS---\s*([\s\S]*?)---END---/i);
   if (blockMatch) {
     commands = blockMatch[1].trim();
   }
-
+  
   // Fall back to original format
   if (!commands) {
-    const commandsMatch = clean.match(/COMMANDS:\s*([\s\S]*?)(?=\n\n|===|$)/i);
+    const commandsMatch = response.match(/COMMANDS:\s*([\s\S]*?)(?=\n\n|===|$)/i);
     commands = commandsMatch?.[1]?.trim() || 'HOLD';
   }
-
-  const sentimentMatch = clean.match(/SENTIMENT:\s*(bullish|neutral|bearish)/i);
-  const riskMatch = clean.match(/RISK:\s*(low|medium|high)/i);
-  const analysisMatch = clean.match(/ANALYSIS:\s*([\s\S]+?)(?=\n\s*(COMMANDS|DECISION):|$)/i);
-
+  
+  const sentimentMatch = response.match(/SENTIMENT:\s*(bullish|neutral|bearish)/i);
+  const riskMatch = response.match(/RISK:\s*(low|medium|high)/i);
+  const analysisMatch = response.match(/ANALYSIS:\s*([\s\S]+?)(?=\n\s*(COMMANDS|DECISION):)/i);
+  
   return {
     sentiment: sentimentMatch?.[1]?.toLowerCase() || null,
     risk: riskMatch?.[1]?.toLowerCase() || null,
