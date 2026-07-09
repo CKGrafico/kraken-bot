@@ -21,6 +21,7 @@ const config = {
   krakenSecret: process.env.KRAKEN_PASSCODE,
   llmProvider: process.env.LLM_PROVIDER || 'ollama',
   openrouterKey: process.env.OPENROUTER_API_KEY,
+  opencodeKey: process.env.OPENCODE_API_KEY,
   llmModel: process.env.LLM_MODEL || 'qwen3.5:cloud',
   ollamaHost: process.env.OLLAMA_HOST || 'localhost',
   ollamaPort: parseInt(process.env.OLLAMA_PORT) || 11434,
@@ -39,7 +40,9 @@ if (!config.krakenKey || !config.krakenSecret) {
   process.exit(1);
 }
 
-const canUseAI = config.llmProvider === 'ollama' || config.openrouterKey;
+const canUseAI = config.llmProvider === 'ollama'
+  || (config.llmProvider === 'opencode' && config.opencodeKey)
+  || config.openrouterKey;
 if (!canUseAI) {
   console.warn('WARNING: No LLM provider configured - AI analysis will be disabled');
 }
@@ -61,9 +64,10 @@ async function init() {
   
   // Initialize AI module
   if (canUseAI) {
+    const apiKey = config.llmProvider === 'opencode' ? config.opencodeKey : config.openrouterKey;
     ai.init({
       provider: config.llmProvider,
-      apiKey: config.openrouterKey,
+      apiKey,
       model: config.llmModel,
       ollamaHost: config.ollamaHost,
       ollamaPort: config.ollamaPort
