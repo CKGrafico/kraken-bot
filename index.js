@@ -31,6 +31,20 @@ const config = {
   countryCode: process.env.COUNTRY_CODE || null
 };
 
+let resolvedProvider = config.llmProvider;
+let resolvedModel = config.llmModel;
+let resolvedOpencodePath = '/zen/v1';
+const apiKey = config.llmProvider === 'opencode' ? config.opencodeKey : config.openrouterKey;
+
+if (config.llmModel.startsWith('opencode/')) {
+  resolvedProvider = 'opencode';
+  resolvedModel = config.llmModel.slice('opencode/'.length);
+  resolvedOpencodePath = '/zen/v1';
+} else if (config.llmModel.startsWith('opencode-go/')) {
+  resolvedProvider = 'opencode';
+  resolvedModel = config.llmModel.slice('opencode-go/'.length);
+  resolvedOpencodePath = '/zen/go/v1';
+}
 // ============================================
 // VALIDATION
 // ============================================
@@ -40,8 +54,8 @@ if (!config.krakenKey || !config.krakenSecret) {
   process.exit(1);
 }
 
-const canUseAI = config.llmProvider === 'ollama'
-  || (config.llmProvider === 'opencode' && config.opencodeKey)
+const canUseAI = resolvedProvider === 'ollama'
+  || (resolvedProvider === 'opencode' && config.opencodeKey)
   || config.openrouterKey;
 if (!canUseAI) {
   console.warn('WARNING: No LLM provider configured - AI analysis will be disabled');
@@ -64,13 +78,14 @@ async function init() {
   
   // Initialize AI module
   if (canUseAI) {
-    const apiKey = config.llmProvider === 'opencode' ? config.opencodeKey : config.openrouterKey;
+    const apiKey = resolvedProvider === 'opencode' ? config.opencodeKey : config.openrouterKey;
     ai.init({
-      provider: config.llmProvider,
+      provider: resolvedProvider,
       apiKey,
-      model: config.llmModel,
+      model: resolvedModel,
       ollamaHost: config.ollamaHost,
-      ollamaPort: config.ollamaPort
+      ollamaPort: config.ollamaPort,
+      opencodePath: resolvedOpencodePath
     });
     ai.setEnabled(config.aiEnabled);
     ai.setInterval(config.analysisIntervalMinutes);

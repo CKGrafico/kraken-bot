@@ -63,7 +63,7 @@ An AI-powered cryptocurrency trading bot for [Kraken](https://www.kraken.com) ex
 | `LLM_PROVIDER` | `ollama` | LLM provider: `ollama`, `openrouter`, or `opencode` |
 | `OPENROUTER_API_KEY` | - | OpenRouter API key (when provider=openrouter) |
 | `OPENCODE_API_KEY` | - | OpenCode Zen API key (when provider=opencode) |
-| `LLM_MODEL` | `qwen3.5:cloud` | LLM model to use |
+| `LLM_MODEL` | `qwen3.5:cloud` | LLM model — prefix `opencode/` for Zen, `opencode-go/` for Go |
 | `PORT` | `8000` | Dashboard port |
 | `AI_ENABLED` | `true` | Enable/disable AI trading |
 | `ANALYSIS_INTERVAL_MINUTES` | `30` | How often AI analyzes |

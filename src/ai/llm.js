@@ -13,6 +13,7 @@ let config = {
   model: 'x-ai/grok-3-mini-beta',
   ollamaHost: 'localhost',
   ollamaPort: 11434,
+  opencodePath: '/zen/v1',
   timeout: 180000
 };
 
@@ -26,6 +27,7 @@ function setConfig(options) {
     config.model = options.model || config.model;
     config.ollamaHost = options.ollamaHost || config.ollamaHost;
     config.ollamaPort = options.ollamaPort || config.ollamaPort;
+    config.opencodePath = options.opencodePath || config.opencodePath;
     config.timeout = options.timeout || config.timeout;
   }
 }
@@ -223,7 +225,8 @@ async function callOpenCode(prompt) {
       model: config.model,
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
-      max_tokens: 600
+      max_tokens: 600,
+      reasoning_effort: "low"
     });
     
     const promptSize = Buffer.byteLength(postData, 'utf8');
@@ -232,7 +235,7 @@ async function callOpenCode(prompt) {
     const req = https.request({
       hostname: 'opencode.ai',
       port: 443,
-      path: '/zen/v1/chat/completions',
+      path: `${config.opencodePath}/chat/completions`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -250,8 +253,11 @@ async function callOpenCode(prompt) {
             reject(new Error(parsed.error.message));
           } else {
             const duration = Date.now() - startTime;
-            console.log(`[AI] OpenCode response: ${(duration/1000).toFixed(1)}s`);
-            resolve(sanitizeResponse(parsed.choices?.[0]?.message?.content));
+            const msg = parsed.choices?.[0]?.message;
+            const content = msg?.content || msg?.reasoning_content;
+            const finishReason = parsed.choices?.[0]?.finish_reason;
+            console.log(`[AI] OpenCode response: ${(duration/1000).toFixed(1)}s, finish_reason=${finishReason}`);
+            resolve(sanitizeResponse(content));
           }
         } catch (e) {
           console.error(`[AI] OpenCode parse error: ${e.message}`);
