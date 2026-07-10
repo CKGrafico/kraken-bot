@@ -34,7 +34,6 @@ const config = {
 let resolvedProvider = config.llmProvider;
 let resolvedModel = config.llmModel;
 let resolvedOpencodePath = '/zen/v1';
-const apiKey = config.llmProvider === 'opencode' ? config.opencodeKey : config.openrouterKey;
 
 if (config.llmModel.startsWith('opencode/')) {
   resolvedProvider = 'opencode';
@@ -56,7 +55,7 @@ if (!config.krakenKey || !config.krakenSecret) {
 
 const canUseAI = resolvedProvider === 'ollama'
   || (resolvedProvider === 'opencode' && config.opencodeKey)
-  || config.openrouterKey;
+  || (resolvedProvider === 'openrouter' && config.openrouterKey);
 if (!canUseAI) {
   console.warn('WARNING: No LLM provider configured - AI analysis will be disabled');
 }

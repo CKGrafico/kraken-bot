@@ -252,10 +252,13 @@ async function callOpenCode(prompt) {
             reject(new Error(parsed.error.message));
           } else {
             const duration = Date.now() - startTime;
-            const msg = parsed.choices?.[0]?.message;
-            const content = msg?.content || msg?.reasoning_content;
+            const content = parsed.choices?.[0]?.message?.content;
             const finishReason = parsed.choices?.[0]?.finish_reason;
             console.log(`[AI] OpenCode response: ${(duration/1000).toFixed(1)}s, finish_reason=${finishReason}`);
+            if (!content) {
+              reject(new Error('OpenCode returned empty content (possibly truncated reasoning or refusal)'));
+              return;
+            }
             resolve(sanitizeResponse(content));
           }
         } catch (e) {

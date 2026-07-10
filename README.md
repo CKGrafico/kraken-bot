@@ -68,6 +68,8 @@ An AI-powered cryptocurrency trading bot for [Kraken](https://www.kraken.com) ex
 | `AI_ENABLED` | `true` | Enable/disable AI trading |
 | `ANALYSIS_INTERVAL_MINUTES` | `30` | How often AI analyzes |
 
+> **Privacy Note:** This bot sends your full portfolio, balances, and trade history to the configured LLM provider. OpenCode Zen's free/preview models are logged and may be used for service improvement per their terms. Use a paid model or a local Ollama instance if you don't want your financial data retained.
+
 ## Project Structure
 
 ```
